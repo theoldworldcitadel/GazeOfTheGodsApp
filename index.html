@@ -65,34 +65,36 @@
 <body class="text-gray-200 min-h-screen pb-12">
     <div class="max-w-6xl mx-auto px-6">
         <!-- Header -->
-        <div class="flex items-center justify-between py-8 border-b border-red-900">
-            <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-red-900 rounded-full flex items-center justify-center text-4xl border-4 border-yellow-500 shadow-xl">
-                    👁️
-                </div>
-                <div>
-                    <h1 class="chaos-header text-5xl text-red-500 tracking-widest">GAZE OF THE GODS</h1>
-                    <p class="text-gray-400 text-lg -mt-2">Chaos Champion Tracker • Warhammer: The Old World</p>
+        <div class="py-6 border-b border-red-900">
+            <div class="flex justify-center">
+                <img src="rollforscenbanner.png" 
+                     alt="Roll for Scenario" 
+                     class="max-w-[420px] w-full h-auto drop-shadow-2xl">
+            </div>
+            <div class="flex justify-center mt-3">
+                <p class="text-gray-400 text-lg text-center px-4">
+                    Chaos Champion Tracker • Warhammer: The Old World
+                </p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-6 text-sm">
-                <div class="flex items-center gap-2 bg-zinc-900 px-4 py-2 rounded-lg border border-red-800">
-                    <i class="fas fa-dice-d6 text-yellow-400"></i>
-                    <span id="turn-counter" class="font-mono text-2xl font-bold text-yellow-400">TURN 1</span>
-                </div>
-                
-                <button onclick="nextTurn()" 
-                        class="px-5 py-3 bg-zinc-800 hover:bg-amber-900 border border-amber-700 rounded-lg flex items-center gap-2 transition-colors">
-                    <i class="fas fa-arrow-right"></i>
-                    NEXT TURN
-                </button>
-                
-                <button onclick="resetGame()" 
-                        class="px-6 py-3 bg-zinc-800 hover:bg-red-950 border border-red-700 rounded-lg flex items-center gap-2 transition-colors">
-                    <i class="fas fa-redo"></i>
-                    RESET GAME
-                </button>
+           <div class="flex justify-center gap-6 py-5 border-b border-red-900/70">
+            <div class="flex items-center gap-2 bg-zinc-900 px-6 py-3 rounded-2xl border border-red-800">
+                <i class="fas fa-dice-d6 text-yellow-400"></i>
+                <span id="turn-counter" class="font-mono text-2xl font-bold text-yellow-400">TURN 1</span>
+            </div>
+            
+            <button onclick="nextTurn()" 
+                    class="px-8 py-3 bg-zinc-800 hover:bg-amber-900 border border-amber-700 rounded-2xl flex items-center gap-2 transition-colors font-medium">
+                <i class="fas fa-arrow-right"></i>
+                NEXT TURN
+            </button>
+            
+            <button onclick="resetGame()" 
+                    class="px-8 py-3 bg-zinc-800 hover:bg-red-950 border border-red-700 rounded-2xl flex items-center gap-2 transition-colors font-medium">
+                <i class="fas fa-redo"></i>
+                RESET GAME
+            </button>
             </div>
         </div>
 
