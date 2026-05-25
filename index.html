@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#8B0000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gaze of the Gods">
+
+    <title>Gaze of the Gods • Chaos Tracker</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-512.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Creepster&display=swap');
+        
+        body {
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        
+        .chaos-header {
+            font-family: 'UnifrakturCook', cursive;
+            text-shadow: 3px 3px 0 #000,
+                        -1px -1px 0 #000,
+                        1px -1px 0 #000,
+                        -1px 1px 0 #000,
+                        1px 1px 0 #000;
+        }
+        
+        .card {
+            background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+            border: 2px solid #4b0000;
+        }
+        
+        .roll-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .roll-btn:hover {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 0 25px rgb(139 0 0);
+        }
+        
+        .bonus-tag {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen pb-12">
+    <div class="max-w-6xl mx-auto px-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between py-8 border-b border-red-900">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-red-900 rounded-full flex items-center justify-center text-4xl border-4 border-yellow-500 shadow-xl">
+                    👁️
+                </div>
+                <div>
+                    <h1 class="chaos-header text-5xl text-red-500 tracking-widest">GAZE OF THE GODS</h1>
+                    <p class="text-gray-400 text-lg -mt-2">Chaos Champion Tracker • Warhammer: The Old World</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 text-sm">
+                <div class="flex items-center gap-2 bg-zinc-900 px-4 py-2 rounded-lg border border-red-800">
+                    <i class="fas fa-dice-d6 text-yellow-400"></i>
+                    <span id="turn-counter" class="font-mono text-2xl font-bold text-yellow-400">TURN 1</span>
+                </div>
+                
+                <button onclick="nextTurn()" 
+                        class="px-5 py-3 bg-zinc-800 hover:bg-amber-900 border border-amber-700 rounded-lg flex items-center gap-2 transition-colors">
+                    <i class="fas fa-arrow-right"></i>
+                    NEXT TURN
+                </button>
+                
+                <button onclick="resetGame()" 
+                        class="px-6 py-3 bg-zinc-800 hover:bg-red-950 border border-red-700 rounded-lg flex items-center gap-2 transition-colors">
+                    <i class="fas fa-redo"></i>
+                    RESET GAME
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-8 mt-8">
+            <!-- Left Sidebar -->
+            <div class="col-span-12 lg:col-span-4">
+                <div class="card rounded-2xl p-8 shadow-2xl">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-3 text-red-400">
+                        <i class="fas fa-skull"></i> CHAOS CHAMPIONS
+                    </h2>
+                    
+                    <div id="champion-inputs" class="space-y-6">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <button onclick="addChampionManually()" 
+                            class="mt-6 w-full py-4 border border-dashed border-red-700 hover:border-red-500 rounded-2xl text-red-400 hover:text-red-300 flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> ADD CHAMPION
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Area -->
+            <div class="col-span-12 lg:col-span-8">
+                <div class="card rounded-2xl p-8 shadow-2xl">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-3xl font-bold text-amber-300">Active Blessings</h2>
+                        <button onclick="rollForAll()" 
+                                class="roll-btn px-8 py-4 bg-gradient-to-r from-red-700 to-red-900 hover:from-red-600 hover:to-red-800 text-white font-bold rounded-2xl flex items-center gap-3 text-lg">
+                            <i class="fas fa-dice-d20 text-2xl"></i>
+                            ROLL FOR ALL
+                        </button>
+                    </div>
+
+                    <div id="champions-display" class="space-y-6">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Gaze Table -->
+                <div class="mt-8 card rounded-2xl p-8">
+                    <h3 class="text-xl font-bold mb-6 text-yellow-400 flex items-center gap-2">
+                        <i class="fas fa-scroll"></i> GAZE OF THE GODS TABLE
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm" id="gaze-table">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer / Disclaimer -->
+    <div class="max-w-6xl mx-auto px-6 mt-12 pt-8 border-t border-red-900/50 text-center">
+        <div class="text-xs text-gray-500 leading-relaxed">
+            This app is unofficial and unendorsed by Games Workshop.<br>
+            Created by the Warhammer Community Podcast &amp; Old World Tavern Magazine.<br>
+            Join our Patreon and immerse yourself with 100s of Podcasts, our world famous Old World Tavern Magazine and more:<br>
+            <a href="https://www.patreon.com/c/TheOldWorldCommunity" 
+               target="_blank" 
+               class="text-red-400 hover:text-red-300 underline">https://www.patreon.com/c/TheOldWorldCommunity</a>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-8 right-8 bg-zinc-900 border border-red-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-50">
+        <i class="fas fa-check-circle text-green-400"></i>
+        <span id="toast-text" class="font-medium"></span>
+    </div>
+
+    <script>
+        const gazeTable = [
+            { roll: 1, name: "Damned by Chaos", bonus: "Stupidity (or -1 Ld)", type: "permanent", stat: "ld" },
+            { roll: 2, name: "Unnatural Quickness", bonus: "+1 Initiative", type: "temporary" },
+            { roll: 3, name: "Iron Skin", bonus: "+1 Toughness", type: "temporary" },
+            { roll: 4, name: "Murderous Mutation", bonus: "+1 Weapon Skill", type: "permanent", stat: "ws" },
+            { roll: 5, name: "Dark Fury", bonus: "+1 Attacks", type: "permanent", stat: "attacks" },
+            { roll: 6, name: "Apotheosis", bonus: "+1 Strength & +1 Leadership", type: "permanent", stat: "str_ld" }
+        ]
+
+        let champions = []
+        let currentTurn = 1
+
+        function renderGazeTable() {
+            const container = document.getElementById('gaze-table')
+            container.innerHTML = gazeTable.map(item => `
+                <div class="bg-black/60 p-5 rounded-2xl border border-red-900/50 hover:border-yellow-600 transition-colors">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-red-400 font-bold text-2xl">Roll ${item.roll}</span>
+                            <div class="text-amber-300 font-semibold mt-1">${item.name}</div>
+                            <div class="text-gray-400 text-sm mt-1">${item.bonus}</div>
+                        </div>
+                        <div class="text-xs px-3 py-1 rounded-full ${item.type === 'permanent' ? 'bg-emerald-900 text-emerald-400' : 'bg-sky-900 text-sky-400'}">
+                            ${item.type.toUpperCase()}
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        function createChampion(name = "") {
+            return {
+                id: Date.now(),
+                name: name || `Champion ${champions.length + 1}`,
+                bonuses: [],
+                cumulative: { ws: 0, attacks: 0, str: 0, ld: 0 },
+                lastRoll: null
+            }
+        }
+
+        function calculateCumulative(champion) {
+            champion.cumulative = { ws: 0, attacks: 0, str: 0, ld: 0 }
+            
+            champion.bonuses.forEach(b => {
+                if (b.type !== 'permanent') return
+                const result = gazeTable.find(r => r.roll === b.roll)
+                if (!result || !result.stat) return
+                
+                if (result.stat === "ws") champion.cumulative.ws += 1
+                if (result.stat === "attacks") champion.cumulative.attacks += 1
+                if (result.stat === "str_ld") {
+                    champion.cumulative.str += 1
+                    champion.cumulative.ld += 1
+                }
+                if (result.stat === "ld") {
+                    champion.cumulative.ld = Math.min(champion.cumulative.ld - 1, 0)
+                }
+            })
+        }
+
+        function renderChampionInputs() {
+            const container = document.getElementById('champion-inputs')
+            container.innerHTML = champions.map(champ => `
+                <div class="flex gap-3 items-center">
+                    <input type="text" value="${champ.name}" 
+                           onchange="updateChampionName(${champ.id}, this.value)"
+                           class="flex-1 bg-zinc-900 border border-red-900 focus:border-red-500 rounded-2xl px-5 py-4 outline-none text-lg">
+                    <button onclick="removeChampion(${champ.id})" class="px-5 text-red-400 hover:text-red-600">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('')
+        }
+
+        function renderChampions() {
+            const container = document.getElementById('champions-display')
+            
+            if (champions.length === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-gray-500">Add Chaos Champions to begin tracking blessings</div>`
+                return
+            }
+
+            container.innerHTML = champions.map(champ => {
+                calculateCumulative(champ)
+                return `
+                <div class="bg-zinc-950 border border-red-800 rounded-3xl p-7">
+                    <div class="flex justify-between items-center mb-6">
+                        <input value="${champ.name}" 
+                               onchange="updateChampionName(${champ.id}, this.value)"
+                               class="bg-transparent text-2xl font-bold outline-none border-b border-transparent hover:border-red-700 focus:border-yellow-400 w-80">
+                        
+                        <div class="flex gap-3">
+                            <button onclick="rollGaze(${champ.id})" 
+                                    class="px-6 py-3 bg-red-900 hover:bg-red-700 rounded-2xl text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-dice"></i> ROLL
+                            </button>
+                            <button onclick="manualBlessing(${champ.id})" 
+                                    class="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm font-bold flex items-center gap-2">
+                                <i class="fas fa-edit"></i> MANUAL
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cumulative Permanent Bonuses -->
+                    <div class="mb-6 bg-black/50 p-5 rounded-2xl">
+                        <div class="text-xs uppercase tracking-widest text-emerald-400 mb-3 flex items-center gap-2">
+                            <i class="fas fa-crown"></i> CUMULATIVE PERMANENT BLESSINGS
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            ${champ.cumulative.ws > 0 ? `
+                            <div class="bg-zinc-900 p-3 rounded-xl">
+                                <div class="text-emerald-400 text-xs">WEAPON SKILL</div>
+                                <div class="text-2xl font-bold text-white">+${champ.cumulative.ws}</div>
+                            </div>` : ''}
+                            ${champ.cumulative.attacks > 0 ? `
+                            <div class="bg-zinc-900 p-3 rounded-xl">
+                                <div class="text-emerald-400 text-xs">ATTACKS</div>
+                                <div class="text-2xl font-bold text-white">+${champ.cumulative.attacks}</div>
+                            </div>` : ''}
+                            ${champ.cumulative.str > 0 ? `
+                            <div class="bg-zinc-900 p-3 rounded-xl">
+                                <div class="text-emerald-400 text-xs">STRENGTH</div>
+                                <div class="text-2xl font-bold text-white">+${champ.cumulative.str}</div>
+                            </div>` : ''}
+                            ${champ.cumulative.ld !== 0 ? `
+                            <div class="bg-zinc-900 p-3 rounded-xl">
+                                <div class="text-emerald-400 text-xs">LEADERSHIP</div>
+                                <div class="text-2xl font-bold text-white">${champ.cumulative.ld > 0 ? '+' : ''}${champ.cumulative.ld}</div>
+                            </div>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Individual Blessings History -->
+                    <div class="mb-4">
+                        <div class="text-xs uppercase tracking-widest text-gray-400 mb-3">BLESSING HISTORY</div>
+                        <div class="flex flex-wrap gap-3" id="bonuses-${champ.id}">
+                            ${champ.bonuses.length ? champ.bonuses.map((b, i) => `
+                                <div onclick="removeBonus(${champ.id}, ${i})" 
+                                     class="bonus-tag cursor-pointer bg-gradient-to-r from-red-900 to-red-800 text-sm px-5 py-3 rounded-3xl flex items-center gap-2 border border-red-700 hover:brightness-110">
+                                    <span>${b.display}</span>
+                                    ${b.type === 'temporary' ? '<span class="text-sky-400 text-xs">(temp)</span>' : ''}
+                                    <span class="ml-2 text-red-300 hover:text-red-100">×</span>
+                                </div>
+                            `).join('') : `<div class="text-gray-500 italic text-sm">No blessings yet...</div>`}
+                        </div>
+                    </div>
+
+                    ${champ.lastRoll ? `
+                    <div class="text-xs bg-black/60 p-3 rounded-2xl text-amber-400">
+                        Last Roll: <span class="font-bold">${champ.lastRoll}</span>
+                    </div>` : ''}
+                </div>
+            `}).join('')
+        }
+
+        function updateChampionName(id, name) {
+            const champ = champions.find(c => c.id === id)
+            if (champ) champ.name = name
+        }
+
+        function addChampionManually() {
+            champions.push(createChampion())
+            renderChampionInputs()
+            renderChampions()
+        }
+
+        function removeChampion(id) {
+            champions = champions.filter(c => c.id !== id)
+            renderChampionInputs()
+            renderChampions()
+        }
+
+        function rollGaze(championId) {
+            const champion = champions.find(c => c.id === championId)
+            if (!champion) return
+
+            const roll = Math.floor(Math.random() * 6) + 1
+            const result = gazeTable.find(r => r.roll === roll)
+            const display = `${result.name} — ${result.bonus}`
+
+            champion.lastRoll = roll
+            champion.bonuses.push({
+                roll: roll,
+                name: result.name,
+                display: display,
+                type: result.type
+            })
+
+            renderChampions()
+            showToast(`${champion.name} received: ${display}`, false)
+        }
+
+        function manualBlessing(championId) {
+            const champion = champions.find(c => c.id === championId)
+            if (!champion) return
+
+            const rollInput = prompt("Enter Gaze of the Gods roll (1-6):", "")
+            let roll = parseInt(rollInput)
+
+            if (isNaN(roll) || roll < 1 || roll > 6) {
+                alert("Please enter a valid number between 1 and 6.")
+                return
+            }
+
+            const result = gazeTable.find(r => r.roll === roll)
+            const display = `${result.name} — ${result.bonus}`
+
+            champion.lastRoll = roll
+            champion.bonuses.push({
+                roll: roll,
+                name: result.name,
+                display: display,
+                type: result.type
+            })
+
+            renderChampions()
+            showToast(`${champion.name} manually received: ${display}`, false)
+        }
+
+        function rollForAll() {
+            if (champions.length === 0) {
+                showToast("Add at least one champion first!", true)
+                return
+            }
+            champions.forEach(champ => rollGaze(champ.id))
+        }
+
+        function removeBonus(championId, index) {
+            const champion = champions.find(c => c.id === championId)
+            if (champion) {
+                champion.bonuses.splice(index, 1)
+                renderChampions()
+            }
+        }
+
+        function nextTurn() {
+            currentTurn++
+            document.getElementById('turn-counter').textContent = `TURN ${currentTurn}`
+
+            champions.forEach(champ => {
+                champ.bonuses = champ.bonuses.filter(b => b.type === 'permanent')
+            })
+
+            renderChampions()
+            showToast(`Turn ${currentTurn} started. Temporary blessings expired.`, false)
+        }
+
+        function resetGame() {
+            if (confirm("Reset all champions and blessings for a new game?")) {
+                champions.forEach(c => {
+                    c.bonuses = []
+                    c.cumulative = { ws: 0, attacks: 0, str: 0, ld: 0 }
+                    c.lastRoll = null
+                })
+                currentTurn = 1
+                document.getElementById('turn-counter').textContent = `TURN ${currentTurn}`
+                renderChampions()
+                showToast("New battle ready. The Gods await...", false)
+            }
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast')
+            document.getElementById('toast-text').textContent = message
+            toast.style.borderColor = isError ? '#ef4444' : '#eab308'
+            toast.classList.remove('hidden')
+            setTimeout(() => toast.classList.add('hidden'), 4000)
+        }
+
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(() => console.log('%cPWA Service Worker registered', 'color: #22c55e'))
+                    .catch(err => console.log('SW registration failed', err))
+            }
+        }
+
+        function initializeApp() {
+            champions = [createChampion("Lord of Chaos")]
+            renderGazeTable()
+            renderChampionInputs()
+            renderChampions()
+            registerServiceWorker()
+        }
+
+        window.onload = initializeApp
+    </script>
+</body>
+</html>
