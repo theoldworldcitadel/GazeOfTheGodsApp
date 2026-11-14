@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gaze-of-the-gods-v2';
+const CACHE_NAME = 'gaze-of-the-gods-v3';
 const urlsToCache = [
   './',
   'index.html',
